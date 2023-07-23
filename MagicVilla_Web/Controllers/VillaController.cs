@@ -3,6 +3,7 @@ using MagicVilla_Web.Models;
 using MagicVilla_Web.Models.Dto;
 using MagicVilla_Web.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Newtonsoft.Json;
 
 namespace MagicVilla_Web.Controllers
@@ -31,5 +32,88 @@ namespace MagicVilla_Web.Controllers
 
             return View(villaList);
         }
+
+        //GET
+        public async Task<IActionResult> CrearVilla()
+        {   
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearVilla(VillaCreateDto modelo) 
+        {
+            if (ModelState.IsValid)
+            { 
+                var response = await _villaService.Crear<APIResponse>(modelo);
+
+                if (response !=null && response.IsExitoso) 
+                {
+                    TempData["exitoso"] = "Villa creada Exitosamente";
+                    return RedirectToAction(nameof(IndexVilla));
+                }
+            }
+            return View(modelo);
+
+        }
+
+        // GET ACTUALIZAR_VILLA
+        public async Task<IActionResult> ActualizarVilla(int villaId)
+        {
+            var response= await _villaService.Obtener<APIResponse>(villaId);
+            if (response !=null && response.IsExitoso) 
+            {
+                VillaDto model = JsonConvert.DeserializeObject<VillaDto>(Convert.ToString(response.Resultado));
+                return View(_mapper.Map<VillaUpdateDto>(model));
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public async Task<IActionResult> ActualizarVilla(VillaUpdateDto modelo)
+        {
+            if (ModelState.IsValid) 
+            {
+                var response = await _villaService.Actualizar<APIResponse>(modelo);
+                if (response != null && response.IsExitoso)
+                {
+                    TempData["exitoso"] = "Villa Actualizada Exitosamente";
+                    return RedirectToAction(nameof(IndexVilla));
+                }
+            }
+            return View(modelo);
+        }
+
+        //GET REMOVER VILLA
+        public async Task<IActionResult> RemoverVilla(int villaId)
+        {
+            var response = await _villaService.Obtener<APIResponse>(villaId);
+
+            if (response != null && response.IsExitoso)
+            {
+                VillaDto model = JsonConvert.DeserializeObject<VillaDto>(Convert.ToString(response.Resultado));
+                return View(model);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        [AutoValidateAntiforgeryToken]
+        public async Task<IActionResult> RemoverVilla(VillaDto modelo)
+        {
+            
+            var response = await _villaService.Remover<APIResponse>(modelo.Id);
+            
+            if (response != null && response.IsExitoso)
+            {
+                TempData["exitoso"] = "Villa Eliminada Exitosamente";
+                return RedirectToAction(nameof(IndexVilla));
+            }
+
+            TempData["error"] = "Ocurrio un error inesperado.";
+            return View(modelo);
+        }
+
+
     }
 }
