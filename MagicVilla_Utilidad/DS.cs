@@ -10,5 +10,8 @@
             DELETE
         }
 
+        public static string SessionToken = "JWToken";
+
+
     }
 }
