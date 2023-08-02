@@ -11,5 +11,8 @@ namespace MagicVilla_Web.Models
 
         public object Resultado { get; set; }
 
+
+        public int TotalPaginas { get; set; }
+
     }
 }
